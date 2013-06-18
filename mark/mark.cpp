@@ -5,7 +5,8 @@
 #include <iostream>
 #include <stdlib.h>  //abs
 #include <vector>
-#include <algorithm>
+#include <algorithm> //min
+#include <math.h>    //sqrt
 
 class mark
 {
@@ -17,7 +18,7 @@ public:
    mark(std::vector<cv::Point> in);
    ~mark();
 
-   int mark::quickDist(cv::Point inPoint);
+   int quickDist(cv::Point inPoint);
 
    int high_x(){return m_highest_x;}
    int high_y(){return m_highest_y;}
@@ -58,46 +59,47 @@ mark::~mark()
    {
       delete (m_ListOfPoints[i]);
    }
+   std::cout<<"destructor"<<std::endl;
 }
 
 int mark::quickDist(cv::Point inPoint)
 {
    
    if(inPoint.x < m_highest_x && inPoint.x  > m_lowest_x &&
-      inPoint.y < m_higest_y  && inPoint.y  > m_loest_y    )
+      inPoint.y < m_highest_y && inPoint.y  > m_lowest_y    )
     {
         return 0;
     }
    
 
-   if(inPoint.x < m_highest_x && inPoint.x  > m_lowestPoint_x)
+   if(inPoint.x < m_highest_x && inPoint.x  > m_lowest_x)
    {
        int distHigh = std::abs(inPoint.y - m_highest_y); 
        int distLow  = std::abs(inPoint.y - m_lowest_y);
        return distHigh > distLow ? distLow : distHigh; //return lowest
    }
-   if(inPoint.y < m_higest_y && inPoint.y >m_lowstPoint_y)
+   if(inPoint.y < m_highest_y && inPoint.y >m_lowest_y)
    {
        int distHigh = std::abs(inPoint.x- m_highest_x);
-       int distLow =   std::abs(inPoint.x- m_highest_x);
+       int distLow =   std::abs(inPoint.x- m_lowest_x);
        return distHigh > distLow ? distLow : distHigh; //return lowest
    }
  
    std::vector<int> possibleDist; 
-   int hh = m_highest_x - inPoint.x *  m_highest_x - inPoint.x +
-            m_highest_y - inPoint.y *  m_highest_y - inPoint.x;
+   int hh = (m_highest_x - inPoint.x) *  (m_highest_x - inPoint.x) +
+            (m_highest_y - inPoint.y) *  (m_highest_y - inPoint.x);
 
-   int hl = m_highest_x - inPoint.x *  m_highest_x - inPoint.x +
-            m_lowest_y  - inPoint.y *  m_lowest_y - inPoint.x;
+   int hl = (m_highest_x - inPoint.x) *  (m_highest_x - inPoint.x) +
+            (m_lowest_y  - inPoint.y) *  (m_lowest_y - inPoint.x);
 
-   int ll = m_lowest_x -  inPoint.x *  m_lowest_x - inPoint.x +
-            m_lowest_y  - inPoint.y *  m_lowest_y - inPoint.x;
+   int ll = (m_lowest_x -  inPoint.x) *  (m_lowest_x - inPoint.x) +
+            (m_lowest_y  - inPoint.y) *  (m_lowest_y - inPoint.x);
 
-   int lh= m_lowest_x  - inPoint.x *  m_lowest_x  - inPoint.x +
-           m_highest_y - inPoint.y *  m_highest_y - inPoint.x;
+   int lh= (m_lowest_x  - inPoint.x) *  (m_lowest_x  - inPoint.x) +
+           (m_highest_y - inPoint.y) *  (m_highest_y - inPoint.x);
 
 
-   std::min(hh, std::min(hl, std::min(lh,ll)));
+   return std::sqrt(std::min(hh, std::min(hl, std::min(lh,ll))));
 }
 
 
