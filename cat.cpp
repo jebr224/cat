@@ -8,12 +8,14 @@
 //
 // src -> src_gray -> blur -> canny ==> contours ==> Zones
 
-#include "zone.cpp"
+#include "zone/zone.cpp"
+#include "mark/mark.cpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+
 
 
 cv::Mat src; 
@@ -33,6 +35,8 @@ int maxDist = 50;
 void thresh_callback(int, void* );
 void blur_callback(int,   void* );
 void makeZones_callback(int, void*);
+
+std::vector<mark*> listOfMarks;
 
 /**
  * @function main
@@ -102,25 +106,32 @@ void thresh_callback(int, void* )
   {
        cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
        cv::drawContours( drawing, contours, (int)i, color, 2, 8, hierarchy, 0, cv::Point() );
+       mark *temp = new mark(contours[i]);
+       listOfMarks.push_back( temp);
+
   }
 
   /// Show in a window
   cv::namedWindow( "Contours", CV_WINDOW_NORMAL );
-  //namedWindow( "Contours", WINDOW_AUTOSIZE );
   cv::imshow( "Contours", drawing );
 
   std::cout<<std::endl<<"number of contours -> " <<contours.size();
+ 
+
+
+  //makeZones_callback(0,0);
 }
 
 
 void makeZones_callback(int,void*)
 {
   std::cout<<zoneDist<<std::endl;
-//  std::vector<zone> myZones;
-//  for ( int i = 0; i < contours.size() ; i++)
-//  {
-//    zone z = new zone;
-//    z.addContour(countour[i])
+  std::vector<zone> myZones;
+  for ( int i = 0; i <listOfMarks.size() ; i++)
+  {
+      zone z = new zone;
+      
+
 //    int j = i;
 //    for(;j < countour.size();j++)
 //    {

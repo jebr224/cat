@@ -50,7 +50,6 @@ mark::mark(std::vector<cv::Point> in)
 
    }   
 
-   std::cout<<"constructor"<<std::endl;
 }
 
 mark::~mark()
@@ -59,7 +58,6 @@ mark::~mark()
    {
       delete (m_ListOfPoints[i]);
    }
-   std::cout<<"destructor"<<std::endl;
 }
 
 int mark::quickDist(cv::Point inPoint)
