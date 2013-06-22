@@ -14,6 +14,7 @@ protected:
    std::vector<cv::Point *> m_ListOfPoints;
    int m_highest_x, m_lowest_x;
    int m_highest_y, m_lowest_y;
+   bool m_inZone;
 public:
    mark(std::vector<cv::Point> in);
    ~mark();
@@ -24,6 +25,8 @@ public:
    int high_y(){return m_highest_y;}
    int low_x() {return m_lowest_x;}
    int low_y() {return m_lowest_y;}
+   void set_inZone(bool in) {m_inZone = in;}
+   bool inZone() {return m_inZone;} 
 
 };
 
@@ -43,13 +46,13 @@ mark::mark(std::vector<cv::Point> in)
        m_ListOfPoints.push_back(temp);
 
        if(m_highest_x <in[i].x) m_highest_x = in[i].x;
-       if(m_highest_y <in[i].x) m_highest_y = in[i].y;
+       if(m_highest_y <in[i].y) m_highest_y = in[i].y;
       
        if(m_lowest_x > in[i].x) m_lowest_x = in[i].x;
        if(m_lowest_y > in[i].y) m_lowest_y = in[i].y;
 
    }   
-
+   m_inZone = false;
 }
 
 mark::~mark()

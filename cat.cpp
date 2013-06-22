@@ -9,7 +9,8 @@
 // src -> src_gray -> blur -> canny ==> contours ==> Zones
 
 #include "zone/zone.cpp"
-#include "mark/mark.cpp"
+//#include "mark/mark.cpp"
+#include "region/region.cpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include <iostream>
@@ -21,12 +22,12 @@
 cv::Mat src; 
 cv::Mat src_gray;
 cv::Mat blur;
-int thresh = 100;
+int thresh = 50;
 int max_thresh = 255;
 cv::RNG rng(12345);
 
-int blurVal = 25;
-int MaxBlur = 100;
+int blurVal = 50;
+int MaxBlur = 25;
 
 int zoneDist = 10;
 int maxDist = 50;
@@ -78,7 +79,7 @@ int main( int, char** argv )
 void blur_callback(int, void* )
 {
   //std::cout<<std::endl<<blurVal; 
-  cv::blur( src_gray ,blur, cv::Size(blurVal/4 + 1,blurVal/4 + 1));  
+  cv::blur( src_gray ,blur, cv::Size(blurVal + 1,blurVal + 1));  
   thresh_callback(0,0);
 
   
@@ -100,6 +101,12 @@ void thresh_callback(int, void* )
   /// Find contours
   cv::findContours( canny_output, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
 
+  for( int f =0; f <listOfMarks.size();f++)
+  {
+       delete listOfMarks[f];
+  }
+  listOfMarks.clear();
+
   /// Draw contours
   cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
   for( size_t i = 0; i< contours.size(); i++ )
@@ -107,7 +114,7 @@ void thresh_callback(int, void* )
        cv::Scalar color = cv::Scalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
        cv::drawContours( drawing, contours, (int)i, color, 2, 8, hierarchy, 0, cv::Point() );
        mark *temp = new mark(contours[i]);
-       listOfMarks.push_back( temp);
+       listOfMarks.push_back(temp);
 
   }
 
@@ -119,18 +126,59 @@ void thresh_callback(int, void* )
  
 
 
-  //makeZones_callback(0,0);
+  makeZones_callback(0,0);
 }
 
 
 void makeZones_callback(int,void*)
 {
-  std::cout<<zoneDist<<std::endl;
-  std::vector<zone> myZones;
-  for ( int i = 0; i <listOfMarks.size() ; i++)
+//  std::cout<<zoneDist<<std::endl;
+
+  std::cout<<std::endl<<"The number of marks is " <<listOfMarks.size();
+/*
+  std::vector<region*> listOfRegions;
+  for(int k =0 ; k< listOfRegions.size() ;k++)
   {
-      zone z = new zone;
-      
+     std::cerr<<"here";
+     delete listOfRegions[k];
+  }
+//  std::cerr<<"outerLoop";
+
+  for(int i =0 ; i<listOfMarks.size();i++)
+  {
+
+     if(!listOfMarks[i]->inZone())
+     {
+        region * temp = new region(listOfMarks[i]);
+        listOfRegions.push_back(temp);
+        listOfMarks[i]->set_inZone(true);
+        for(int j = 0; j<listOfMarks.size();j++)
+        {
+//          std::cerr<<"3rd in loop  ";  
+//           std::cerr<<temp->minQuickDist(listOfMarks[j]) <<std::endl;
+
+          if(temp->minQuickDist(listOfMarks[j]) < 10 && !(listOfMarks[j]->inZone()))
+	    {
+
+//                  std::cerr<<"4thLoop____________";
+                  temp->addMark(listOfMarks[j]);
+                  listOfMarks[j]->set_inZone(true);
+		  j = 0;
+	    }
+        }
+      } 
+ }
+
+  std::cout<<std::endl<<"number of regions " <<listOfRegions.size();
+*/
+//  for ( int i = 0; i <listOfMarks.size() ; i++)
+//  {
+//    mark temp= listOfMarks[i];
+//    std::min(temp.quickDist(hold.high
+
+
+ //    zone *z = new zone;
+//  }      
 
 //    int j = i;
 //    for(;j < countour.size();j++)
