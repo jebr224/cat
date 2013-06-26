@@ -15,6 +15,10 @@ void drawWrapper(int, void*);
 
 int blur,thresh,thick,length;
 artWork chad; 
+   cv::Mat page;
+   cv::Mat inImage;
+   cv::Rect boarder;
+   artWork wholeImage;
 
 int main(int argc, char* argv[])
 {
@@ -25,19 +29,35 @@ int main(int argc, char* argv[])
       return 1;
    }
    
-   chad = artWork(argv[1]);
+   wholeImage = artWork(argv[1]);
+   inImage = cv::imread(argv[1],1);
 
+
+   boarder = wholeImage.findSquares(700,450,0);
+   //page = inImage(boarder );
+   inImage(boarder).copyTo(page);
+   chad = artWork(page);
+
+   
    blur =   chad.getBlur();
    thresh = chad.getThresh();
    thick =  chad.getThick();
    length = chad.getLength();
+   
    
    cv::namedWindow( "Source", CV_WINDOW_NORMAL ) ;
    cv::createTrackbar("blur","Source", &blur, 25, blurWrapper);
    cv::createTrackbar("thresh","Source", &thresh, 255, threshWrapper);
    cv::createTrackbar("Thick","Source", &thick, 20, thickWrapper);
    //cv::createTrackbar("Horizontal","Source", &horz, 100, thresh_callback);
+   
+   
    blurWrapper(0,0);
+      std::cerr<<"after";
+      
+      
+     
+
    cv::waitKey(0);
 
 }
