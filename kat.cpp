@@ -13,7 +13,8 @@ class artWork
    protected:
       cv::Mat m_inputImage, 
               m_blurImage,   m_threshHoldImage,
-              m_filledImage, m_outputImage;
+              m_filledImage, m_lengthImage,
+               m_outputImage;
 
       std::vector<mark> m_listOfMarks;
  
@@ -37,7 +38,7 @@ class artWork
       cv::Mat applyBlur  (int inBlur);
       cv::Mat applyThresh(int inThresh);
       cv::Mat applyThick (int inThick);
-      //cv::Mat applyLength(int inLength);
+      cv::Mat applyLength(int inLength);
 
 
       cv::Mat applyBlur  ();
@@ -93,7 +94,6 @@ artWork::artWork(std::string fileName)
 
 artWork::artWork(cv::Mat inputImage)
 {
-  std::cerr<<"before";  
   m_inputImage =  cv::Mat(inputImage); 
  // Mat copy constructor
 
@@ -155,12 +155,71 @@ cv::Mat artWork::applyThick()
  
 }
 
-/*
-cv::Mat artWork::applyLength(int inLength)
+
+cv::Mat artWork::applyLength()
 {
-   return m_inputImage;
+//	std::cerr<< std::endl<<"in Apply Length";
+  // m_lengthImage = cv::Mat::zeros(m_inputImage.size(),CV_8UC1);
+//   m_lengthImage = cv::Mat::zeros(m_threshHoldImage.size(),CV_8UC1);
+   
+   //cv::cvtColor(  m_filledImage,m_lengthImage, 
+     //            cv::COLOR_BGR2GRAY );
+  
+  // cv::threshold( m_blurImage,m_threshHoldImage , m_thresh, 255 ,1 );
+
+   //m_lengthImage =  m_filledImage >1;
+ 
+   //cv::cvtColor(  m_filledImage,tempImage_1, 
+    //              cv::COLOR_BGR2GRAY );
+     
+   //empImage_1 = m_filledImage;
+  // cv::Canny( tempImage_1, tempImage_1, m_thresh, m_thresh*2, 3 );
+
+    //cv::Mat  tempImage_1;
+   cv::threshold( m_filledImage,m_lengthImage , 200, 255 ,1 );
+  
+
+  // cv::waitKey(0);
+
+   cv::Mat localImage =  m_lengthImage.clone();
+   std::vector<std::vector<cv::Point> > tempContoursList;
+   std::vector<cv::Vec4i> TempHierarchy;
+   cv::findContours( localImage, tempContoursList, TempHierarchy, 
+                    cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, 
+                    cv::Point(0, 0) );
+             
+     //cv::namedWindow( "bug", CV_WINDOW_NORMAL );
+     //cv::imshow( "bug", m_lengthImage);
+       
+  
+
+     
+//   std::cerr<<std::endl<<"found  the points";
+   for( size_t i = 0; i<tempContoursList.size() ; i++ )
+   {
+      cv::Rect  tempRect = cv::boundingRect( cv::Mat(tempContoursList[i]));
+      //cv::drawContours( m_outputImage, tempContoursList, (int)i, 
+      //                  cv::Scalar(255,255,255) , 2, 8, TempHierarchy , 0, cv::Point() );
+      if(    tempRect.x  <5  && tempRect.y<5)
+      {
+	  }
+	  else
+	  {
+      int x  =tempRect.x + tempRect.width;
+      int y = tempRect.y + tempRect.height/2;
+      
+      cv::Point one = cv::Point(x + m_length,y);
+      cv::Point two = cv::Point(tempRect.x -m_length,y);     
+      cv::Scalar white =cv::Scalar(255); 
+      cv::Scalar black = cv::Scalar(0);
+      cv::line(m_lengthImage, one, two, black, 8,4,0);
+      }
+   }
+   
+
+   return m_lengthImage;
 }
-*/
+
 
 cv::Mat artWork::drawMarks()
 {
@@ -172,7 +231,7 @@ cv::Mat artWork::drawMarks()
    //  m_outputImage = cv::Mat(m_inputImage);
    m_outputImage = cv::Mat::zeros(m_inputImage.size(),CV_8UC3);
    
-   cv::findContours( m_filledImage, tempContoursList, TempHierarchy, 
+   cv::findContours( m_lengthImage, tempContoursList, TempHierarchy, 
                     cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, 
                     cv::Point(0, 0) );
    for( size_t i = 0; i<tempContoursList.size() ; i++ )
@@ -268,12 +327,14 @@ cv::Rect   artWork::findSquares(int length, int width, float tolerance)
                     // if cosines of all angles are small
                     // (all angles are ~90 degree) then write quandrange
                     // vertices to resultant sequence
-                    if( maxCosine < 0.3 )
+                    if( maxCosine < 0.5 )
                         squares.push_back(approx);
                  }
             }
           }
        }
+        
+    
     
     //std::vector<cv::Point>  bestFit;
      int bestFitValue = 2147483647;
@@ -336,13 +397,13 @@ cv::Mat artWork::applyThick(int inThick)
    m_thick = inThick;
    return this->applyThick();
 }
-/*
+
 cv::Mat artWork::applyLength(int inLength)
 {
    m_length = inLength;
    return this->applyLength();
 }
-*/
+
 
 void artWork::setBlur(int inBlur)
 {
